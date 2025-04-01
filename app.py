@@ -4,7 +4,7 @@ import whisper
 import tempfile
 import os
 from gtts import gTTS
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase
+from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, WebRtcMode
 import av
 import numpy as np
 import queue
@@ -32,8 +32,6 @@ if expected_text:
 
 class AudioProcessor(AudioProcessorBase):
     def __init__(self) -> None:
-        self.recorded_frames = []
-        self.recording = False
         self.audio_queue = queue.Queue()
 
     def recv(self, frame: av.AudioFrame) -> av.AudioFrame:
@@ -42,40 +40,12 @@ class AudioProcessor(AudioProcessorBase):
         return frame
 
 ctx = webrtc_streamer(key="prononciation",
-                      mode="sendonly",
+                      mode=WebRtcMode.SENDONLY,
                       audio_receiver_size=256,
                       media_stream_constraints={"audio": True, "video": False},
                       async_processing=True)
 
-if ctx.audio_receiver:
-    audio_data = []
-    for i in range(50):
-        try:
-            audio_chunk = ctx.audio_receiver.get_audio_frame()
-            audio_data.append(audio_chunk.to_ndarray())
-            time.sleep(0.2)
-        except queue.Empty:
-            break
-
-    if audio_data:
-        audio_array = np.concatenate(audio_data, axis=1)[0]
-        temp_audio_path = "user_voice.wav"
-        sf.write(temp_audio_path, audio_array, 48000)
-
-        st.audio(temp_audio_path, format="audio/wav")
-
-        with st.spinner("🧠 Analyse de votre prononciation..."):
-            result = model.transcribe(temp_audio_path, language="fr")
-            user_text = result["text"]
-
-        st.markdown("### 📄 Transcription de votre voix :")
-        st.write(user_text)
-
-        if expected_text.strip().lower() in user_text.strip().lower():
-            st.success("✅ Bonne prononciation ! La phrase est correcte.")
-        else:
-            st.warning("🔍 Il semble y avoir des différences avec la phrase attendue.")
-            st.markdown("**Phrase attendue :** " + expected_text)
-            st.markdown("**Votre phrase :** " + user_text)
-
-        os.remove(temp_audio_path)
+if not ctx.state.playing:
+    st.warning("🎤 Le module n'est pas encore actif. Autorisez l'accès au micro si demandé.")
+else:
+    st.success("🎙️ Micro actif ! Vous pouvez commencer à parler.")
