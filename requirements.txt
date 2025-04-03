@@ -1,0 +1,10 @@
+
+streamlit
+openai
+openai-whisper
+torch
+ffmpeg-python
+gtts
+soundfile
+av
+streamlit-webrtc
