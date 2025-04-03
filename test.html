@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Micro - AI Linguistique</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
+    button { padding: 1rem 2rem; font-size: 1.2rem; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    audio { display: block; margin-top: 1rem; }
+    #log { margin-top: 1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🎙️ Test de Micro - AI Linguistique</h1>
+  <p>Cliquez sur le bouton ci-dessous, parlez pendant 3 secondes, et vérifiez si votre voix a été bien enregistrée :</p>
+  <button id="recordBtn">🎧 Démarrer le test</button>
+  <div id="log"></div>
+  <audio id="audioPlayback" controls></audio>
+
+  <script>
+    const recordBtn = document.getElementById('recordBtn');
+    const log = document.getElementById('log');
+    const audioPlayback = document.getElementById('audioPlayback');
+
+    recordBtn.onclick = async () => {
+      log.textContent = "Enregistrement en cours... Parlez maintenant.";
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks = [];
+
+        mediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) {
+            audioChunks.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          if (audioChunks.length === 0) {
+            log.textContent = "❌ Aucun son capté. Veuillez vérifier votre micro.";
+            return;
+          }
+
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioURL = URL.createObjectURL(audioBlob);
+          audioPlayback.src = audioURL;
+          log.textContent = "✅ Voix captée avec succès !";
+        };
+
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 3000); // 3 secondes
+      } catch (err) {
+        console.error("Erreur d'accès au micro :", err);
+        log.textContent = "❌ Erreur : l'accès au micro est refusé ou non disponible.";
+      }
+    };
+  </script>
+</body>
+</html>
