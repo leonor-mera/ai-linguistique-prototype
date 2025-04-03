@@ -3,6 +3,7 @@ streamlit
 openai
 openai-whisper
 torch
+pydub
 ffmpeg-python
 gtts
 soundfile
