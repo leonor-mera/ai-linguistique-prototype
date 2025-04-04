@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Test de Micro - AI Linguistique</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
+    button { padding: 1rem 2rem; font-size: 1.2rem; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    audio, a.download { display: block; margin-top: 1rem; }
+    #log { margin-top: 1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🎙️ Enregistrement vocal - AI Linguistique</h1>
+  <p>Cliquez sur le bouton, parlez pendant 3 secondes et téléversez ensuite l'audio dans votre app Streamlit :</p>
+  <button id="recordBtn">🎧 Démarrer l'enregistrement</button>
+  <div id="log"></div>
+  <audio id="audioPlayback" controls></audio>
+  <a id="downloadLink" class="download" style="display:none" download="enregistrement.webm">⬇️ Télécharger l'audio</a>
+
+  <script>
+    const recordBtn = document.getElementById('recordBtn');
+    const log = document.getElementById('log');
+    const audioPlayback = document.getElementById('audioPlayback');
+    const downloadLink = document.getElementById('downloadLink');
+
+    recordBtn.onclick = async () => {
+      log.textContent = "Enregistrement en cours... Parlez maintenant.";
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks = [];
+
+        mediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) {
+            audioChunks.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          if (audioChunks.length === 0) {
+            log.textContent = "❌ Aucun son capté. Veuillez vérifier votre micro.";
+            return;
+          }
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioURL = URL.createObjectURL(audioBlob);
+          audioPlayback.src = audioURL;
+          log.textContent = "✅ Enregistrement terminé. Téléchargez puis importez l'audio ci-dessous dans l'app.";
+
+          downloadLink.href = audioURL;
+          downloadLink.style.display = 'inline-block';
+        };
+
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 3000);
+      } catch (err) {
+        console.error("Erreur d'accès au micro :", err);
+        log.textContent = "❌ Erreur : l'accès au micro est refusé ou non disponible.";
+      }
+    };
+  </script>
+</body>
+</html>
