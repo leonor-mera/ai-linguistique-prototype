@@ -1,0 +1,8 @@
+
+streamlit
+streamlit-webrtc
+openai-whisper
+pydub
+soundfile
+torch
+ffmpeg-python
