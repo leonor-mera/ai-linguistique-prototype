@@ -16,8 +16,12 @@ st.set_page_config(page_title="AI Linguistique - Direct", layout="centered")
 st.title("🎙️ AI Linguistique - Évaluation vocale directe")
 
 phrase_modele = "Bonjour, je m'appelle Leonor et j’apprends le français québécois."
-st.markdown(f"🗣️ **Phrase à prononcer** : "{phrase_modele}"")
-st.markdown("🎧 Parlez directement et recevez votre transcription + score de prononciation.")
+st.markdown(f"""
+🗣️ Phrase à prononcer :  
+> **🗣️ {phrase_modele}**
+
+🎧 Parlez directement et recevez votre transcription + score de prononciation.
+""")
 
 @st.cache_resource
 def load_model():
